@@ -93,7 +93,7 @@ class CircularCameraDialog(
                     )
                     .build()
             )
-            videoFilePath = outputFilePath ?: getDefaultVideoPath()
+            videoFilePath = getOutputFilePath()
             try {
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(this, cameraSelector, preview, videoCapture)
@@ -104,18 +104,28 @@ class CircularCameraDialog(
         }, ContextCompat.getMainExecutor(requireContext()))
     }
 
-    private fun getDefaultVideoPath(): String {
-        return File(
-            File(
-            requireContext().getExternalFilesDir(null)
-                ?: throw IllegalStateException("External storage not available"),
-            "${
+    private fun getOutputFilePath(): String {
+        // 1. Get app-specific external storage directory
+        val baseDir = requireContext().getExternalFilesDir(null)
+            ?: throw IllegalStateException("External storage not available")
+
+        // 2. Determine the final directory
+        val finalDir = if (outputFilePath != null) {
+            File(baseDir, outputFilePath).apply {
+                if (!exists()) mkdirs()
+            }
+        } else {
+            // Default location if no path provided
+            val appName =
                 requireContext().applicationInfo.loadLabel(requireContext().packageManager)
-            }/Video"
-        ).apply {
-            if (!exists()) mkdirs()
-        }, "video_${System.currentTimeMillis()}.mp4"
-        ).absolutePath
+                    .toString()
+            File(baseDir, "$appName/Video").apply {
+                if (!exists()) mkdirs()
+            }
+        }
+
+        // 3. Generate unique filename
+        return File(finalDir, "video_${System.currentTimeMillis()}.mp4").absolutePath
     }
 
     private fun startRecordingWithTimer() {
