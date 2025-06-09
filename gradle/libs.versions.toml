@@ -25,6 +25,7 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 
 camera-core = { module = "androidx.camera:camera-core", version.ref = "cameraView" }
 camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "cameraView" }
+camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraView" }
 camera-video = { module = "androidx.camera:camera-video", version.ref = "cameraView" }
 camera-view = { module = "androidx.camera:camera-view", version.ref = "cameraView" }
 
@@ -37,4 +38,4 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 
 
 [bundles]
-camera = ["camera-core", "camera-lifecycle", "camera-video", "camera-view"]
+camera = ["camera-core", "camera-lifecycle", "camera-video", "camera-view","camera-camera2"]
