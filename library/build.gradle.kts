@@ -41,9 +41,9 @@ android {
             publications {
                 create<MavenPublication>("release") {
                     from(components["release"])
-                    groupId = "com.github.sina-tabriziyan" // Replace with your GitHub username
-                    artifactId = "SCameraX" // Replace with your repository name
-                    version = "0.0.1" // Replace with your version
+                    groupId = "com.github.sina-tabriziyan"
+                    artifactId = "SCameraX"
+                    version = "0.0.1"
                 }
             }
         }
