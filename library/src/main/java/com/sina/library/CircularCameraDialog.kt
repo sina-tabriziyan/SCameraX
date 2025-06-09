@@ -31,9 +31,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
+import java.nio.file.Files.exists
 
 class CircularCameraDialog(
-    private val outputFilePath: String,
+    private val outputFilePath: String? = null,
     private val onVideoRecorded: (filePath: String) -> Unit
 ) : DialogFragment() {
     private var _binding: DialogCircularCameraBinding? = null
@@ -92,7 +93,7 @@ class CircularCameraDialog(
                     )
                     .build()
             )
-            videoFilePath = outputFilePath
+            videoFilePath = outputFilePath ?: getDefaultVideoPath()
             try {
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(this, cameraSelector, preview, videoCapture)
@@ -103,19 +104,19 @@ class CircularCameraDialog(
         }, ContextCompat.getMainExecutor(requireContext()))
     }
 
-//    private fun generateOutputFilePath(): String {
-//        // 1) Get your app-specific external files root:
-//        val baseDir = requireContext().getExternalFilesDir(null)
-//            ?: throw IllegalStateException("External storage not available")
-//
-//        // 2) Build a subfolder “Teamyar/Teamyar Videos” under it
-//        val videoDir = File(baseDir, "Teamyar/Teamyar Videos").apply {
-//            if (!exists()) mkdirs()
-//        }
-//
-//        // 3) Return a filename inside that directory
-//        return File(videoDir, "video_${System.currentTimeMillis()}.mp4").absolutePath
-//    }
+    private fun getDefaultVideoPath(): String {
+        return File(
+            File(
+            requireContext().getExternalFilesDir(null)
+                ?: throw IllegalStateException("External storage not available"),
+            "${
+                requireContext().applicationInfo.loadLabel(requireContext().packageManager)
+            }/Video"
+        ).apply {
+            if (!exists()) mkdirs()
+        }, "video_${System.currentTimeMillis()}.mp4"
+        ).absolutePath
+    }
 
     private fun startRecordingWithTimer() {
         if (isRecording) return
