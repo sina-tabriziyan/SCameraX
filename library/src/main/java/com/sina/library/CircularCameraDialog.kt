@@ -32,7 +32,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 
-class CircularCameraDialog(private val onVideoRecorded: (filePath: String) -> Unit) : DialogFragment() {
+class CircularCameraDialog(
+    private val outputFilePath: String,
+    private val onVideoRecorded: (filePath: String) -> Unit
+) : DialogFragment() {
     private var _binding: DialogCircularCameraBinding? = null
     private val binding get() = _binding!!
     private var recording: Recording? = null
@@ -81,10 +84,15 @@ class CircularCameraDialog(private val onVideoRecorded: (filePath: String) -> Un
             preview.surfaceProvider = binding.cameraPreview.surfaceProvider
             this.videoCapture = VideoCapture.withOutput(
                 Recorder.Builder()
-                    .setQualitySelector(QualitySelector.from(Quality.SD, FallbackStrategy.lowerQualityOrHigherThan(Quality.LOWEST)))
+                    .setQualitySelector(
+                        QualitySelector.from(
+                            Quality.SD,
+                            FallbackStrategy.lowerQualityOrHigherThan(Quality.LOWEST)
+                        )
+                    )
                     .build()
             )
-            videoFilePath = generateOutputFilePath()
+            videoFilePath = outputFilePath
             try {
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(this, cameraSelector, preview, videoCapture)
@@ -95,25 +103,28 @@ class CircularCameraDialog(private val onVideoRecorded: (filePath: String) -> Un
         }, ContextCompat.getMainExecutor(requireContext()))
     }
 
-    private fun generateOutputFilePath(): String {
-        // 1) Get your app-specific external files root:
-        val baseDir = requireContext().getExternalFilesDir(null)
-            ?: throw IllegalStateException("External storage not available")
-
-        // 2) Build a subfolder “Teamyar/Teamyar Videos” under it
-        val videoDir = File(baseDir, "Teamyar/Teamyar Videos").apply {
-            if (!exists()) mkdirs()
-        }
-
-        // 3) Return a filename inside that directory
-        return File(videoDir, "video_${System.currentTimeMillis()}.mp4").absolutePath
-    }
+//    private fun generateOutputFilePath(): String {
+//        // 1) Get your app-specific external files root:
+//        val baseDir = requireContext().getExternalFilesDir(null)
+//            ?: throw IllegalStateException("External storage not available")
+//
+//        // 2) Build a subfolder “Teamyar/Teamyar Videos” under it
+//        val videoDir = File(baseDir, "Teamyar/Teamyar Videos").apply {
+//            if (!exists()) mkdirs()
+//        }
+//
+//        // 3) Return a filename inside that directory
+//        return File(videoDir, "video_${System.currentTimeMillis()}.mp4").absolutePath
+//    }
 
     private fun startRecordingWithTimer() {
         if (isRecording) return
         isRecording = true
 
-        recording = videoCapture?.output?.prepareRecording(requireContext(), FileOutputOptions.Builder(File(videoFilePath!!)).build())
+        recording = videoCapture?.output?.prepareRecording(
+            requireContext(),
+            FileOutputOptions.Builder(File(videoFilePath!!)).build()
+        )
             ?.start(ContextCompat.getMainExecutor(requireContext())) { recordEvent ->
                 if (recordEvent is VideoRecordEvent.Finalize) {
                     onVideoRecorded(videoFilePath!!)
