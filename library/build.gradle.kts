@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.sina.library"
+    namespace = "com.sina.scamerax.library"
     compileSdk = 35
 
     defaultConfig {
