@@ -96,9 +96,17 @@ class CircularCameraDialog(private val onVideoRecorded: (filePath: String) -> Un
     }
 
     private fun generateOutputFilePath(): String {
-        val dir = File(Environment.getExternalStorageDirectory(), "Teamyar/Teamyar Video")
-        if (!dir.exists()) dir.mkdirs()
-        return File(dir, "video_${System.currentTimeMillis()}.mp4").absolutePath
+        // 1) Get your app-specific external files root:
+        val baseDir = requireContext().getExternalFilesDir(null)
+            ?: throw IllegalStateException("External storage not available")
+
+        // 2) Build a subfolder “Teamyar/Teamyar Videos” under it
+        val videoDir = File(baseDir, "Teamyar/Teamyar Videos").apply {
+            if (!exists()) mkdirs()
+        }
+
+        // 3) Return a filename inside that directory
+        return File(videoDir, "video_${System.currentTimeMillis()}.mp4").absolutePath
     }
 
     private fun startRecordingWithTimer() {
